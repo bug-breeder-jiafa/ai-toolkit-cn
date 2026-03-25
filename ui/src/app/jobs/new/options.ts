@@ -801,12 +801,12 @@ interface JobTypeOption extends SelectOption {
 export const jobTypeOptions: JobTypeOption[] = [
   {
     value: 'diffusion_trainer',
-    label: 'LoRA Trainer',
+    label: 'LoRA 训练器',
     disableSections: ['slider'],
   },
   {
     value: 'concept_slider',
-    label: 'Concept Slider',
+    label: '概念滑块 (Concept Slider)',
     disableSections: ['trigger_word', 'train.diff_output_preservation'],
     onActivate: (config: JobConfig) => {
       // add default slider config

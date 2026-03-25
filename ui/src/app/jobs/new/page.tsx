@@ -192,7 +192,7 @@ export default function TrainingForm() {
           </Button>
         </div>
         <div>
-          <h1 className="text-lg">{runId ? 'Edit Training Job' : 'New Training Job'}</h1>
+          <h1 className="text-lg">{runId ? '保存训练任务' : '新建训练任务'}</h1>
         </div>
         <div className="flex-1"></div>
         {showAdvancedView && (
@@ -201,7 +201,7 @@ export default function TrainingForm() {
               <SelectInput
                 value={`${gpuIDs}`}
                 onChange={value => setGpuIDs(value)}
-                options={gpuList.map((gpu: any) => ({ value: `${gpu.index}`, label: `GPU #${gpu.index}` }))}
+                options={gpuList.map((gpu: any) => ({ value: `${gpu.index}`, label: `显卡 GPU #${gpu.index}` }))}
               />
             </div>
             <div className="mx-4 bg-gray-200 dark:bg-gray-800 w-1 h-6"></div>
@@ -210,7 +210,7 @@ export default function TrainingForm() {
                 className="text-gray-200 bg-gray-800 px-3 py-1 rounded-md"
                 onClick={handleImportConfig}
               >
-                Import Config
+                导入配置
               </Button>
             </div>
             <div className="mx-4 bg-gray-200 dark:bg-gray-800 w-1 h-6"></div>
@@ -254,7 +254,7 @@ export default function TrainingForm() {
             className="text-gray-200 bg-gray-800 px-3 py-1 rounded-md"
             onClick={() => setShowAdvancedView(!showAdvancedView)}
           >
-            {showAdvancedView ? 'Show Simple' : 'Show Advanced'}
+            {showAdvancedView ? '显示常规' : '显示高级'}
           </Button>
         </div>
         <div>
@@ -263,7 +263,7 @@ export default function TrainingForm() {
             onClick={() => saveJob()}
             disabled={status === 'saving'}
           >
-            {status === 'saving' ? 'Saving...' : runId ? 'Update Job' : 'Create Job'}
+            {status === 'saving' ? '保存中...' : runId ? '更新任务' : '创建任务'}
           </Button>
         </div>
       </TopBar>
