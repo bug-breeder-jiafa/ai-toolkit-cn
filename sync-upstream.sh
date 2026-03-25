@@ -14,24 +14,16 @@ echo ""
 UPSTREAM_REMOTE="origin"  # 如果你添加了原项目 remote，改为 "upstream"
 UPSTREAM_BRANCH="main"
 LOCALIZATION_BRANCH="localization-zh"
-SKIP_BUILD=false  # 设置为 true 跳过构建测试
-VERIFY_IN_DOCKER=false  # 设置为 true 在 Docker 中验证
 
 # 解析命令行参数
-while getopts "u:b:sdvh" opt; do
+while getopts "u:b:h" opt; do
   case $opt in
     u) UPSTREAM_REMOTE="$OPTARG" ;;
     b) LOCALIZATION_BRANCH="$OPTARG" ;;
-    s) SKIP_BUILD=true ;;
-    d) VERIFY_IN_DOCKER=true ;;
-    v) echo "版本：1.1.0"; exit 0 ;;
     h)
-      echo "用法：$0 [-u upstream_remote] [-b localization_branch] [-s] [-d]"
+      echo "用法：$0 [-u upstream_remote] [-b localization_branch]"
       echo "  -u: 上游 remote 名称 (默认：origin)"
       echo "  -b: 汉化分支名称 (默认：localization-zh)"
-      echo "  -s: 跳过构建测试"
-      echo "  -d: 在 Docker 容器中验证构建"
-      echo "  -v: 显示版本"
       exit 0
       ;;
     \?) echo "无效选项：-$OPTARG"; exit 1 ;;
@@ -44,8 +36,6 @@ echo "配置信息:"
 echo "  上游 remote: $UPSTREAM_REMOTE"
 echo "  上游分支：$UPSTREAM_BRANCH"
 echo "  汉化分支：$LOCALIZATION_BRANCH"
-echo "  跳过构建：$SKIP_BUILD"
-echo "  Docker 验证：$VERIFY_IN_DOCKER"
 echo ""
 
 # 1. 检查当前分支
@@ -128,98 +118,38 @@ fi
 echo "✅ 合并成功！"
 echo ""
 
-# 8. 运行构建测试（可选）
-if [ "$SKIP_BUILD" = false ]; then
-  echo "🔨 运行构建测试..."
-  cd ui
-  
-  if [ "$VERIFY_IN_DOCKER" = true ]; then
-    # 在 Docker 容器中验证
-    echo "🐳 在 Docker 容器中验证构建..."
-    echo ""
-    echo "注意：由于 NAS 环境限制，构建将在 Docker 容器中进行。"
-    echo "请确保已启动 ai-toolkit 容器。"
-    echo ""
-    
-    # 将当前代码复制到 Docker 容器中
-    CONTAINER_NAME="ai-toolkit"
-    CONTAINER_PATH="/workspace/ai-toolkit/ui"
-    
-    echo "📦 复制代码到容器..."
-    docker cp .. ${CONTAINER_NAME}:/tmp/ai-toolkit-sync
-    
-    echo "🔨 在容器中运行构建..."
-    if docker exec ${CONTAINER_NAME} bash -c "
-      cd /tmp/ai-toolkit-sync/ui &&
-      npm install --legacy-peer-deps &&
-      npm run build
-    " 2>&1 | tee ../build.log; then
-      echo ""
-      echo "✅ Docker 构建成功！"
-      
-      # 清理临时文件
-      docker exec ${CONTAINER_NAME} rm -rf /tmp/ai-toolkit-sync
-    else
-      echo ""
-      echo "❌ Docker 构建失败！请检查错误日志。"
-      echo ""
-      echo "日志已保存到：build.log"
-      echo ""
-      echo "可能的原因:"
-      echo "1. 上游更新引入了代码变更，导致汉化内容冲突"
-      echo "2. 新增的文件未汉化"
-      echo "3. Node.js 依赖问题"
-      echo ""
-      echo "修复后重新运行此脚本，或跳过构建测试：./sync-upstream.sh -s"
-      cd ..
-      exit 1
-    fi
-  elif command -v npm &> /dev/null; then
-    # 本地构建
-    if npm run build 2>&1 | tee ../build.log; then
-      echo "✅ 构建成功！"
-    else
-      echo ""
-      echo "❌ 构建失败！请检查错误日志。"
-      echo ""
-      echo "日志已保存到：build.log"
-      echo ""
-      echo "可能的原因:"
-      echo "1. 上游更新引入了代码变更，导致汉化内容冲突"
-      echo "2. 新增的文件未汉化"
-      echo ""
-      echo "修复后重新运行此脚本，或跳过构建测试：./sync-upstream.sh -s"
-      cd ..
-      exit 1
-    fi
-  else
-    echo "⚠️  未找到 npm，跳过构建测试"
-  fi
-  
-  cd ..
-fi
-
-# 9. 恢复暂存的修改
+# 8. 恢复暂存的修改
 if [ "$STASHED" = true ]; then
   echo "💾 恢复暂存的修改..."
   git stash pop
 fi
 
-# 10. 显示总结
+# 9. 显示总结和下一步提示
 echo ""
 echo "======================================"
-echo "  ✅ 同步完成！"
+echo "  ✅ 代码合并完成！"
 echo "======================================"
 echo ""
 echo "新增提交:"
 git log --oneline $LOCAL_COMMIT..HEAD | head -10
 echo ""
-echo "下一步操作:"
-echo "1. 检查变更：git diff $LOCAL_COMMIT"
-echo "2. 测试界面：cd ui && npm run dev"
-echo "3. 推送到 GitHub: git push origin $LOCALIZATION_BRANCH"
+echo "📋 下一步操作（人工验证）:"
 echo ""
-echo "如果需要回滚:"
+echo "1️⃣  检查变更内容"
+echo "   git diff $LOCAL_COMMIT"
+echo ""
+echo "2️⃣  将代码复制到验证环境"
+echo "   # 使用 rsync、scp 或其他方式将代码复制到带 GPU 的机器"
+echo "   rsync -av ./ user@gpu-server:/path/to/ai-toolkit/"
+echo ""
+echo "3️⃣  在验证环境中构建测试"
+echo "   # 在 GPU 机器上执行"
+echo "   cd ui && npm run build"
+echo ""
+echo "4️⃣  验证通过后推送到 GitHub"
+echo "   git push origin $LOCALIZATION_BRANCH"
+echo ""
+echo "⚠️  如果验证失败需要回滚:"
 echo "   git reset --hard $BACKUP_BRANCH"
 echo "   git branch -D $BACKUP_BRANCH  # 确认无误后删除备份"
 echo ""
