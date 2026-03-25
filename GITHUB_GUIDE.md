@@ -59,8 +59,11 @@ cd /home/node/.openclaw/workspace/ai-toolkit-env/ai-toolkit
 # 切换到汉化分支
 git checkout localization-zh
 
-# 运行同步脚本
-./sync-upstream.sh
+# 运行同步脚本（在 Docker 容器中验证构建）
+./sync-upstream.sh -d
+
+# 或者跳过验证（快速模式）
+./sync-upstream.sh -s
 ```
 
 脚本会自动：
@@ -68,10 +71,10 @@ git checkout localization-zh
 2. ✅ 获取最新代码
 3. ✅ 创建备份分支
 4. ✅ 合并上游更新
-5. ✅ 运行构建测试
+5. ✅ **在 Docker 容器中运行构建测试**（`-d` 选项）
 6. ✅ 提示推送
 
-### 方法二：手动流程
+### 方法二：手动流程（NAS 环境）
 
 ```bash
 # 1. 切换到汉化分支
@@ -92,12 +95,23 @@ git merge upstream/main
 # 6. 解决可能的冲突（如果有）
 # 编辑冲突文件 → git add <文件> → git commit
 
-# 7. 测试构建
-cd ui
-npm run build
+# 7. 在 Docker 容器中测试构建
+./verify-in-docker.sh
 
 # 8. 推送到 GitHub
 git push origin localization-zh
+```
+
+### 方法三：独立验证脚本
+
+如果只想验证当前代码，不合并更新：
+
+```bash
+# 运行独立验证脚本
+./verify-in-docker.sh
+
+# 或指定容器名称
+./verify-in-docker.sh ai-toolkit-container
 ```
 
 ---
@@ -159,18 +173,19 @@ jobs:
 
 ---
 
-## 四、完整更新流程图
+## 四、完整更新流程图（NAS 环境）
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  1. 检查更新                                             │
-│     git fetch upstream main                             │
-│     git log HEAD..upstream/main --oneline               │
+│  1. 检查更新（在 NAS 中）                                │
+│     cd /home/node/.openclaw/workspace/ai-toolkit-env   │
+│     git checkout localization-zh                        │
+│     ./sync-upstream.sh                                  │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  2. 创建备份分支                                         │
-│     git branch backup-YYYYMMDD                          │
+│  2. 自动创建备份分支                                     │
+│     backup-YYYYMMDD-HHMMSS                              │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
@@ -185,26 +200,32 @@ jobs:
                           ↓
               ┌───────────┴───────────┐
               ↓                       ↓
-    ┌─────────────────┐     ┌─────────────────┐
-    │ 4a. 解决冲突     │     │ 4b. 运行测试     │
-    │ 手动编辑冲突文件 │     │ cd ui           │
-    │ git add <文件>   │     │ npm run build   │
-    │ git commit       │     └────────┬────────┘
-    └────────┬────────┘              ↓
-             │              ┌────────┴────────┐
-             │              │ 测试通过？       │
-             │              └────────┬────────┘
-             │                Yes    │   No
-             │                       ↓
-             │             ┌─────────┴─────────┐
-             │             ↓                   ↓
-             │   ┌─────────────────┐  ┌─────────────────┐
-             │   │ 5. 推送更新      │  │ 5a. 修复问题     │
-             │   │ git push origin │  │ 回滚到备份       │
-             │   │ localization-zh │  └─────────────────┘
-             │   └─────────────────┘
+    ┌─────────────────┐     ┌─────────────────────────┐
+    │ 4a. 解决冲突     │     │ 4b. 在 Docker 中验证     │
+    │ 手动编辑冲突文件 │     │ ./verify-in-docker.sh   │
+    │ git add <文件>   │     │ (复制到容器构建)         │
+    │ git commit       │     └──────────┬──────────────┘
+    └────────┬────────┘                 ↓
+             │              ┌───────────┴───────────┐
+             │              │ 构建通过？             │
+             │              └───────────┬───────────┘
+             │                Yes       │   No
+             │                          ↓
+             │                ┌─────────┴─────────┐
+             │                ↓                   ↓
+             │      ┌─────────────────┐  ┌─────────────────┐
+             │      │ 5. 推送到 GitHub │  │ 5a. 修复问题     │
+             │      │ git push origin │  │ 回滚到备份       │
+             │      │ localization-zh │  │ 分析错误日志     │
+             │      └─────────────────┘  └─────────────────┘
              └──────────→ 继续到步骤 5
 ```
+
+**NAS 环境特殊说明**：
+- ❌ NAS 无 GPU，无法本地运行 ai-toolkit
+- ✅ 代码同步在 NAS 的 Git 仓库中进行
+- ✅ 构建验证通过 Docker 容器执行
+- ✅ 验证通过后再推送到 GitHub
 
 ---
 
@@ -347,21 +368,26 @@ git push origin v1.0.0
 
 ---
 
-## 八、快速命令参考
+## 八、快速命令参考（NAS 环境）
 
 ```bash
 # 检查更新
 git fetch upstream main
 git log HEAD..upstream/main --oneline
 
-# 合并更新
-./sync-upstream.sh
+# 合并更新（自动在 Docker 中验证）
+./sync-upstream.sh -d
 
 # 或手动合并
 git merge upstream/main
 
-# 测试构建
-cd ui && npm run build
+# 在 Docker 容器中测试构建
+./verify-in-docker.sh
+
+# 或者进入容器测试
+docker exec -it ai-toolkit bash
+cd /tmp/verify-build/ui
+npm run build
 
 # 推送更新
 git push origin localization-zh
@@ -373,6 +399,69 @@ git reset --hard backup-YYYYMMDD
 git status
 git remote -v
 git branch -a
+
+# 查看容器日志
+docker compose logs -f
+```
+
+---
+
+## 九、NAS 环境特殊配置
+
+### 硬件限制
+
+- **无 NVIDIA GPU**：无法本地运行训练任务
+- **配置较低**：Node.js 构建可能较慢
+- **解决方案**：使用 Docker 容器进行验证
+
+### 推荐工作流
+
+```
+NAS (Git 管理)          Docker 容器 (构建验证)        GitHub (代码托管)
+     │                        │                           │
+     ├─ git merge ──────────→ │                           │
+     │                        │                           │
+     │                        ├─ npm run build ─────────→ │
+     │                        │                           │
+     │←─ 验证成功 ────────────┤                           │
+     │                        │                           │
+     ├─ git push ───────────────────────────────────────→ │
+     │                                                    │
+```
+
+### 容器配置检查
+
+```bash
+# 确认容器运行中
+docker compose ps
+
+# 查看容器资源占用
+docker stats ai-toolkit
+
+# 进入容器调试
+docker exec -it ai-toolkit bash
+
+# 查看容器日志
+docker compose logs -f
+```
+
+### 故障排查
+
+**问题 1**: 容器未运行
+```bash
+docker compose up -d
+```
+
+**问题 2**: 容器内 npm 安装失败
+```bash
+docker exec ai-toolkit npm cache clean --force
+docker exec ai-toolkit rm -rf node_modules package-lock.json
+```
+
+**问题 3**: 构建超时
+```bash
+# 增加 Docker 资源限制
+# 编辑 docker-compose.yml，增加内存和 CPU 限制
 ```
 
 ---
