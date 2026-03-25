@@ -15,18 +15,23 @@ UPSTREAM_REMOTE="origin"  # 如果你添加了原项目 remote，改为 "upstrea
 UPSTREAM_BRANCH="main"
 LOCALIZATION_BRANCH="localization-zh"
 SKIP_BUILD=false  # 设置为 true 跳过构建测试
+VERIFY_IN_DOCKER=false  # 设置为 true 在 Docker 中验证
 
 # 解析命令行参数
-while getopts "u:b:sh" opt; do
+while getopts "u:b:sdvh" opt; do
   case $opt in
     u) UPSTREAM_REMOTE="$OPTARG" ;;
     b) LOCALIZATION_BRANCH="$OPTARG" ;;
     s) SKIP_BUILD=true ;;
+    d) VERIFY_IN_DOCKER=true ;;
+    v) echo "版本：1.1.0"; exit 0 ;;
     h)
-      echo "用法：$0 [-u upstream_remote] [-b localization_branch] [-s]"
+      echo "用法：$0 [-u upstream_remote] [-b localization_branch] [-s] [-d]"
       echo "  -u: 上游 remote 名称 (默认：origin)"
       echo "  -b: 汉化分支名称 (默认：localization-zh)"
       echo "  -s: 跳过构建测试"
+      echo "  -d: 在 Docker 容器中验证构建"
+      echo "  -v: 显示版本"
       exit 0
       ;;
     \?) echo "无效选项：-$OPTARG"; exit 1 ;;
@@ -40,6 +45,7 @@ echo "  上游 remote: $UPSTREAM_REMOTE"
 echo "  上游分支：$UPSTREAM_BRANCH"
 echo "  汉化分支：$LOCALIZATION_BRANCH"
 echo "  跳过构建：$SKIP_BUILD"
+echo "  Docker 验证：$VERIFY_IN_DOCKER"
 echo ""
 
 # 1. 检查当前分支
@@ -127,7 +133,49 @@ if [ "$SKIP_BUILD" = false ]; then
   echo "🔨 运行构建测试..."
   cd ui
   
-  if command -v npm &> /dev/null; then
+  if [ "$VERIFY_IN_DOCKER" = true ]; then
+    # 在 Docker 容器中验证
+    echo "🐳 在 Docker 容器中验证构建..."
+    echo ""
+    echo "注意：由于 NAS 环境限制，构建将在 Docker 容器中进行。"
+    echo "请确保已启动 ai-toolkit 容器。"
+    echo ""
+    
+    # 将当前代码复制到 Docker 容器中
+    CONTAINER_NAME="ai-toolkit"
+    CONTAINER_PATH="/workspace/ai-toolkit/ui"
+    
+    echo "📦 复制代码到容器..."
+    docker cp .. ${CONTAINER_NAME}:/tmp/ai-toolkit-sync
+    
+    echo "🔨 在容器中运行构建..."
+    if docker exec ${CONTAINER_NAME} bash -c "
+      cd /tmp/ai-toolkit-sync/ui &&
+      npm install --legacy-peer-deps &&
+      npm run build
+    " 2>&1 | tee ../build.log; then
+      echo ""
+      echo "✅ Docker 构建成功！"
+      
+      # 清理临时文件
+      docker exec ${CONTAINER_NAME} rm -rf /tmp/ai-toolkit-sync
+    else
+      echo ""
+      echo "❌ Docker 构建失败！请检查错误日志。"
+      echo ""
+      echo "日志已保存到：build.log"
+      echo ""
+      echo "可能的原因:"
+      echo "1. 上游更新引入了代码变更，导致汉化内容冲突"
+      echo "2. 新增的文件未汉化"
+      echo "3. Node.js 依赖问题"
+      echo ""
+      echo "修复后重新运行此脚本，或跳过构建测试：./sync-upstream.sh -s"
+      cd ..
+      exit 1
+    fi
+  elif command -v npm &> /dev/null; then
+    # 本地构建
     if npm run build 2>&1 | tee ../build.log; then
       echo "✅ 构建成功！"
     else
