@@ -59,11 +59,8 @@ cd /home/node/.openclaw/workspace/ai-toolkit-env/ai-toolkit
 # 切换到汉化分支
 git checkout localization-zh
 
-# 运行同步脚本（在 Docker 容器中验证构建）
-./sync-upstream.sh -d
-
-# 或者跳过验证（快速模式）
-./sync-upstream.sh -s
+# 运行同步脚本（只负责 Git 合并）
+./sync-upstream.sh
 ```
 
 脚本会自动：
@@ -71,10 +68,11 @@ git checkout localization-zh
 2. ✅ 获取最新代码
 3. ✅ 创建备份分支
 4. ✅ 合并上游更新
-5. ✅ **在 Docker 容器中运行构建测试**（`-d` 选项）
-6. ✅ 提示推送
+5. ✅ 输出人工验证步骤
 
-### 方法二：手动流程（NAS 环境）
+**验证和推送需要手动执行**（见下文）。
+
+### 方法二：手动流程
 
 ```bash
 # 1. 切换到汉化分支
@@ -95,168 +93,126 @@ git merge upstream/main
 # 6. 解决可能的冲突（如果有）
 # 编辑冲突文件 → git add <文件> → git commit
 
-# 7. 在 Docker 容器中测试构建
-./verify-in-docker.sh
+# 7. 人工验证（见下文）
 
 # 8. 推送到 GitHub
 git push origin localization-zh
 ```
 
-### 方法三：独立验证脚本
+---
 
-如果只想验证当前代码，不合并更新：
+## 三、人工验证流程（跨环境）
+
+由于 NAS 环境限制，验证需要在带 GPU 的机器上进行。
+
+### 步骤 1: 检查变更内容
 
 ```bash
-# 运行独立验证脚本
-./verify-in-docker.sh
+cd /home/node/.openclaw/workspace/ai-toolkit-env/ai-toolkit
 
-# 或指定容器名称
-./verify-in-docker.sh ai-toolkit-container
+# 查看变更了哪些文件
+git diff HEAD~1 --stat
+
+# 查看具体变更
+git diff HEAD~1
+```
+
+### 步骤 2: 复制代码到验证环境
+
+**方式 A: rsync**
+```bash
+rsync -av --exclude='node_modules' \
+        --exclude='.git' \
+        ./ user@gpu-server:/path/to/ai-toolkit/
+```
+
+**方式 B: scp**
+```bash
+scp -r . user@gpu-server:/path/to/ai-toolkit/
+```
+
+**方式 C: Git 推送**
+```bash
+# 推送到 GitHub 后，在 GPU 机器上拉取
+git push origin localization-zh
+
+# 然后在 GPU 机器上：
+git pull origin localization-zh
+```
+
+### 步骤 3: 在验证环境中构建
+
+登录到 GPU 机器后：
+
+```bash
+cd /path/to/ai-toolkit/ui
+
+# 安装依赖
+npm install --legacy-peer-deps
+
+# 运行构建
+npm run build
+```
+
+**验证要点**：
+- ✅ 构建成功，无错误
+- ✅ 访问界面检查汉化是否正常
+- ✅ 关键页面功能正常（任务队列、数据集、设置等）
+
+### 步骤 4: 验证通过后推送
+
+```bash
+# 回到 NAS 环境
+cd /home/node/.openclaw/workspace/ai-toolkit-env/ai-toolkit
+
+# 推送到 GitHub
+git push origin localization-zh
 ```
 
 ---
 
-## 三、GitHub Actions 自动化（可选）
-
-如果你希望自动检查更新并通知，可以配置 GitHub Actions。
-
-### 创建 `.github/workflows/sync-check.yml`
-
-```yaml
-name: Check Upstream Updates
-
-on:
-  schedule:
-    # 每周一 00:00 UTC 检查
-    - cron: '0 0 * * 1'
-  workflow_dispatch:  # 允许手动触发
-
-jobs:
-  check-updates:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: localization-zh
-
-      - name: Add upstream remote
-        run: git remote add upstream https://github.com/ostris/ai-toolkit.git
-
-      - name: Fetch upstream
-        run: git fetch upstream main
-
-      - name: Check for updates
-        id: check
-        run: |
-          LOCAL=$(git rev-parse HEAD)
-          UPSTREAM=$(git rev-parse upstream/main)
-          if [ "$LOCAL" != "$UPSTREAM" ]; then
-            echo "has_updates=true" >> $GITHUB_OUTPUT
-            COMMITS=$(git log --oneline $LOCAL..$UPSTREAM | head -10)
-            echo "commits<<EOF" >> $GITHUB_OUTPUT
-            echo "$COMMITS" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "has_updates=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create Issue (if updates available)
-        if: steps.check.outputs.has_updates == 'true'
-        uses: peter-evans/create-issue-from-file@v4
-        with:
-          title: 🆕 上游有新更新
-          content-filepath: .github/ISSUE_TEMPLATE/update-available.md
-          labels: update-available
-```
-
----
-
-## 四、完整更新流程图（NAS 环境）
+## 四、完整更新流程图
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  1. 检查更新（在 NAS 中）                                │
-│     cd /home/node/.openclaw/workspace/ai-toolkit-env   │
-│     git checkout localization-zh                        │
+│  1. NAS: 运行同步脚本                                    │
 │     ./sync-upstream.sh                                  │
+│     - 合并上游更新                                       │
+│     - 创建备份分支                                       │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  2. 自动创建备份分支                                     │
-│     backup-YYYYMMDD-HHMMSS                              │
+│  2. NAS: 检查变更                                        │
+│     git diff HEAD~1 --stat                              │
 └─────────────────────────────────────────────────────────┘
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│  3. 合并上游更新                                         │
-│     git merge upstream/main                             │
+│  3. 复制代码到 GPU 环境                                   │
+│     rsync / scp / git push                              │
+└─────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────┐
+│  4. GPU 环境：构建验证                                    │
+│     cd ui && npm install && npm run build               │
 └─────────────────────────────────────────────────────────┘
                           ↓
                     ┌─────┴─────┐
-                    │ 有冲突？   │
+                    │ 验证通过？ │
                     └─────┬─────┘
                      Yes  │  No
                           ↓
               ┌───────────┴───────────┐
               ↓                       ↓
-    ┌─────────────────┐     ┌─────────────────────────┐
-    │ 4a. 解决冲突     │     │ 4b. 在 Docker 中验证     │
-    │ 手动编辑冲突文件 │     │ ./verify-in-docker.sh   │
-    │ git add <文件>   │     │ (复制到容器构建)         │
-    │ git commit       │     └──────────┬──────────────┘
-    └────────┬────────┘                 ↓
-             │              ┌───────────┴───────────┐
-             │              │ 构建通过？             │
-             │              └───────────┬───────────┘
-             │                Yes       │   No
-             │                          ↓
-             │                ┌─────────┴─────────┐
-             │                ↓                   ↓
-             │      ┌─────────────────┐  ┌─────────────────┐
-             │      │ 5. 推送到 GitHub │  │ 5a. 修复问题     │
-             │      │ git push origin │  │ 回滚到备份       │
-             │      │ localization-zh │  │ 分析错误日志     │
-             │      └─────────────────┘  └─────────────────┘
-             └──────────→ 继续到步骤 5
-```
-
-**NAS 环境特殊说明**：
-- ❌ NAS 无 GPU，无法本地运行 ai-toolkit
-- ✅ 代码同步在 NAS 的 Git 仓库中进行
-- ✅ 构建验证通过 Docker 容器执行
-- ✅ 验证通过后再推送到 GitHub
-
----
-
-## 五、推送更新到 GitHub
-
-### 推送汉化分支
-
-```bash
-# 确保在汉化分支
-git checkout localization-zh
-
-# 推送到你的 GitHub 仓库
-git push origin localization-zh
-```
-
-### 同时更新 main 分支（可选）
-
-```bash
-# 切换到 main
-git checkout main
-
-# 确保与上游同步
-git pull upstream main
-
-# 推送到你的 GitHub
-git push origin main
+    ┌─────────────────┐     ┌─────────────────┐
+    │ 5. 推送到 GitHub │     │ 5a. 修复问题     │
+    │ git push origin │     │ NAS 回滚到备份     │
+    │ localization-zh │     │ git reset --hard │
+    └─────────────────┘     └─────────────────┘
 ```
 
 ---
 
-## 六、常见问题
+## 五、常见问题
 
 ### Q1: 合并后出现大量冲突怎么办？
 
@@ -273,20 +229,18 @@ git diff HEAD..upstream/main --name-only
 # 4. 逐个文件手动解决
 ```
 
-### Q2: 构建失败如何回滚？
+### Q2: 验证失败如何回滚？
 
+**在 NAS 上**：
 ```bash
-# 1. 找到备份分支
+# 找到备份分支
 git branch | grep backup
 
-# 2. 回滚到备份
+# 回滚到备份
 git reset --hard backup-YYYYMMDD
 
-# 3. 删除失败的合并分支
-git branch -D localization-zh
-
-# 4. 重新创建分支
-git checkout -b localization-zh
+# 如果已经推送到 GitHub，强制覆盖
+git push -f origin localization-zh
 ```
 
 ### Q3: 如何只更新特定文件？
@@ -312,9 +266,22 @@ git diff upstream/main..localization-zh --stat
 git diff upstream/main..localization-zh -- path/to/file.tsx
 ```
 
+### Q5: 如何确认备份分支可以安全删除？
+
+```bash
+# 1. 确认验证通过并已推送
+git log origin/localization-zh --oneline | head -5
+
+# 2. 确认当前分支与推送的一致
+git diff HEAD origin/localization-zh
+
+# 3. 无差异则安全删除备份
+git branch -D backup-YYYYMMDD
+```
+
 ---
 
-## 七、最佳实践
+## 六、最佳实践
 
 ### 1. 定期同步
 
@@ -342,17 +309,17 @@ git add src/app/datasets/
 git commit -m "汉化：数据集页面"
 ```
 
-### 3. 测试后再推送
+### 3. 验证清单
 
-```bash
-# 本地测试
-cd ui && npm run dev
+每次更新后检查：
 
-# 访问 http://localhost:8675 检查界面
-
-# 确认无误后再推送
-git push origin localization-zh
-```
+- [ ] 构建成功，无 TypeScript 错误
+- [ ] 首页/仪表盘正常显示
+- [ ] 任务队列页面正常
+- [ ] 新建任务页面正常
+- [ ] 数据集页面正常
+- [ ] 设置页面正常
+- [ ] 预览图功能正常
 
 ### 4. 发布 Release
 
@@ -368,29 +335,20 @@ git push origin v1.0.0
 
 ---
 
-## 八、快速命令参考（NAS 环境）
+## 七、快速命令参考
+
+### NAS 环境（Git 管理）
 
 ```bash
 # 检查更新
 git fetch upstream main
 git log HEAD..upstream/main --oneline
 
-# 合并更新（自动在 Docker 中验证）
-./sync-upstream.sh -d
+# 合并更新
+./sync-upstream.sh
 
-# 或手动合并
-git merge upstream/main
-
-# 在 Docker 容器中测试构建
-./verify-in-docker.sh
-
-# 或者进入容器测试
-docker exec -it ai-toolkit bash
-cd /tmp/verify-build/ui
-npm run build
-
-# 推送更新
-git push origin localization-zh
+# 查看变更
+git diff HEAD~1 --stat
 
 # 回滚
 git reset --hard backup-YYYYMMDD
@@ -399,70 +357,52 @@ git reset --hard backup-YYYYMMDD
 git status
 git remote -v
 git branch -a
+```
 
-# 查看容器日志
-docker compose logs -f
+### GPU 环境（验证构建）
+
+```bash
+# 拉取最新代码
+git pull origin localization-zh
+
+# 安装依赖
+cd ui && npm install --legacy-peer-deps
+
+# 运行构建
+npm run build
+
+# 开发模式测试
+npm run dev
+```
+
+### 推送更新
+
+```bash
+# NAS 上推送
+git push origin localization-zh
+
+# 强制推送（回滚后）
+git push -f origin localization-zh
 ```
 
 ---
 
-## 九、NAS 环境特殊配置
-
-### 硬件限制
-
-- **无 NVIDIA GPU**：无法本地运行训练任务
-- **配置较低**：Node.js 构建可能较慢
-- **解决方案**：使用 Docker 容器进行验证
-
-### 推荐工作流
+## 八、环境架构说明
 
 ```
-NAS (Git 管理)          Docker 容器 (构建验证)        GitHub (代码托管)
-     │                        │                           │
-     ├─ git merge ──────────→ │                           │
-     │                        │                           │
-     │                        ├─ npm run build ─────────→ │
-     │                        │                           │
-     │←─ 验证成功 ────────────┤                           │
-     │                        │                           │
-     ├─ git push ───────────────────────────────────────→ │
-     │                                                    │
+┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
+│   NAS 环境       │         │  GPU 验证环境    │         │   GitHub        │
+│                 │         │                 │         │                 │
+│ - Git 仓库       │ ──────→ │ - 构建测试       │ ──────→ │ - 代码托管       │
+│ - 代码合并       │  复制   │ - 功能验证       │  推送   │ - 版本管理       │
+│ - 无 GPU         │  代码   │ - 有 GPU         │        │ - 发布 Release   │
+└─────────────────┘         └─────────────────┘         └─────────────────┘
 ```
 
-### 容器配置检查
-
-```bash
-# 确认容器运行中
-docker compose ps
-
-# 查看容器资源占用
-docker stats ai-toolkit
-
-# 进入容器调试
-docker exec -it ai-toolkit bash
-
-# 查看容器日志
-docker compose logs -f
-```
-
-### 故障排查
-
-**问题 1**: 容器未运行
-```bash
-docker compose up -d
-```
-
-**问题 2**: 容器内 npm 安装失败
-```bash
-docker exec ai-toolkit npm cache clean --force
-docker exec ai-toolkit rm -rf node_modules package-lock.json
-```
-
-**问题 3**: 构建超时
-```bash
-# 增加 Docker 资源限制
-# 编辑 docker-compose.yml，增加内存和 CPU 限制
-```
+**安全说明**：
+- NAS 不直接操作其他机器的 Docker
+- 验证由人工在 GPU 环境执行
+- 验证通过后才推送到 GitHub
 
 ---
 
