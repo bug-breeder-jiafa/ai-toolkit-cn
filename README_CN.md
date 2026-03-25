@@ -2,7 +2,7 @@
 
 > 本汉化版基于 [ostris/ai-toolkit](https://github.com/ostris/ai-toolkit) 完整翻译
 > 
-> **汉化版本**: localization-zh | **原项目版本**: main (同步至 commit 7f3309b)
+> **汉化版本**: main | **原项目版本**: main (同步至 commit 7f3309b)
 
 AI Toolkit 是一个多功能扩散模型训练套件，支持在消费级硬件上训练最新的图像和视频模型。支持 GUI 和 CLI 两种操作方式，设计简洁易用，同时具备完整的训练功能。
 
@@ -395,7 +395,7 @@ network:
 
 ## 版本信息
 
-- **汉化分支**: `localization-zh`
+- **汉化分支**: `main`（唯一分支）
 - **基于版本**: main (commit `7f3309b`)
 - **最后同步**: 2026-03-25
 - **汉化提交**: `54255be`
@@ -420,7 +420,7 @@ git checkout main
 git pull origin main
 
 # 合并到汉化分支
-git checkout localization-zh
+git checkout main
 git merge main
 
 # 解决冲突后重启容器
