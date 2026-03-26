@@ -72,7 +72,7 @@ export default function TrainingForm() {
         setJobConfig(parsed);
       } catch (err) {
         console.error('Failed to parse config file:', err);
-        alert('Failed to parse config file. Please check the file format.');
+        alert('配置文件解析失败，请检查文件格式。');
       }
     };
     reader.readAsText(file);
@@ -169,9 +169,9 @@ export default function TrainingForm() {
       })
       .catch(error => {
         if (error.response?.status === 409) {
-          alert('Training name already exists. Please choose a different name.');
+          alert('训练名称已存在，请选择其他名称。');
         } else {
-          alert('Failed to save job. Please try again.');
+          alert('保存任务失败，请重试。');
         }
         console.log('Error saving training:', error);
       })
@@ -300,7 +300,7 @@ export default function TrainingForm() {
           <ErrorBoundary
             fallback={
               <div className="flex items-center justify-center h-64 text-lg text-red-600 font-medium bg-red-100 dark:bg-red-900/20 dark:text-red-400 border border-red-300 dark:border-red-700 rounded-lg">
-                Advanced job detected. Please switch to advanced view to continue.
+                检测到高级任务配置。请切换到高级视图继续编辑。
               </div>
             }
           >
