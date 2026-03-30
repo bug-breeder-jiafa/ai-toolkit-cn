@@ -240,16 +240,16 @@ export default function FullscreenDropOverlay({
               <FaUpload className="size-10 opacity-80" />
               {!isUploading ? (
                 <>
-                  <p className="text-lg font-semibold">Drop files to upload</p>
+                  <p className="text-lg font-semibold">拖放文件以上传</p>
                   <p className="text-sm opacity-80">
-                    Destination:&nbsp;<span className="font-mono">{datasetName || 'unknown'}</span>
+                    目标数据集:&nbsp;<span className="font-mono">{datasetName || '未知'}</span>
                   </p>
-                  <p className="text-xs opacity-70 mt-1">Images, videos, or .txt supported</p>
+                  <p className="text-xs opacity-70 mt-1">支持图片、视频或 .txt 文件</p>
                 </>
               ) : (
                 <>
                   <p className="text-lg font-semibold">
-                    Uploading… {doneCount + errorCount} / {totalCount}
+                    上传中… {doneCount + errorCount} / {totalCount}
                   </p>
                   <div className="w-full h-2.5 bg-white/20 rounded-full overflow-hidden">
                     <div
@@ -259,7 +259,7 @@ export default function FullscreenDropOverlay({
                   </div>
                   {errorCount > 0 && (
                     <p className="text-xs text-red-400">
-                      {errorCount} file{errorCount !== 1 ? 's' : ''} failed
+                      {errorCount} 个文件上传失败
                     </p>
                   )}
                   <button
@@ -270,7 +270,7 @@ export default function FullscreenDropOverlay({
                     }}
                     className="mt-2 px-4 py-1.5 text-sm rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
                   >
-                    Cancel
+                    取消
                   </button>
                 </>
               )}
@@ -338,8 +338,8 @@ function FileRow({ entry }: { entry: FileEntry }) {
 
       <span className="flex-shrink-0 w-16 text-right">
         {entry.status === 'uploading' && <span className="text-blue-300">{entry.progress}%</span>}
-        {entry.status === 'error' && <span className="text-red-400">Failed</span>}
-        {entry.status === 'pending' && <span className="text-white/30">Queued</span>}
+        {entry.status === 'error' && <span className="text-red-400">失败</span>}
+        {entry.status === 'pending' && <span className="text-white/30">排队中</span>}
       </span>
     </div>
   );

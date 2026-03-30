@@ -63,7 +63,7 @@ export default function AddImagesModal() {
             <div className="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="text-center">
                 <DialogTitle as="h3" className="text-base font-semibold text-gray-200 mb-4">
-                  Add Images to: {addImagesModalInfo?.datasetName}
+                  添加图片到: {addImagesModalInfo?.datasetName}
                 </DialogTitle>
                 <div className="w-full">
                   <div
@@ -71,7 +71,7 @@ export default function AddImagesModal() {
                   >
                     <FaUpload className="size-8 mb-3 text-gray-400" />
                     <p className="text-sm text-gray-200 text-center">
-                      Drag & drop files anywhere on the page to upload
+                      在页面任意位置拖放文件以上传
                     </p>
                   </div>
                 </div>
@@ -83,7 +83,7 @@ export default function AddImagesModal() {
                 onClick={onDone}
                 className="inline-flex w-full justify-center rounded-md bg-slate-600 px-3 py-2 text-sm font-semibold text-white shadow-xs sm:ml-3 sm:w-auto"
               >
-                Done
+                完成
               </button>
               <button
                 type="button"
@@ -91,7 +91,7 @@ export default function AddImagesModal() {
                 onClick={onCancel}
                 className="mt-3 inline-flex w-full justify-center rounded-md bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-800 sm:mt-0 sm:w-auto ring-0"
               >
-                Cancel
+                取消
               </button>
             </div>
           </DialogPanel>
