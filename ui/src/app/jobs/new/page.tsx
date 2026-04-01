@@ -72,7 +72,7 @@ export default function TrainingForm() {
         setJobConfig(parsed);
       } catch (err) {
         console.error('Failed to parse config file:', err);
-        alert('配置文件解析失败，请检查文件格式。');
+        alert('Failed to parse config file. Please check the file format.');
       }
     };
     reader.readAsText(file);
@@ -169,9 +169,9 @@ export default function TrainingForm() {
       })
       .catch(error => {
         if (error.response?.status === 409) {
-          alert('训练名称已存在，请选择其他名称。');
+          alert('Training name already exists. Please choose a different name.');
         } else {
-          alert('保存任务失败，请重试。');
+          alert('Failed to save job. Please try again.');
         }
         console.log('Error saving training:', error);
       })
@@ -196,7 +196,7 @@ export default function TrainingForm() {
           </Button>
         </div>
         <div>
-          <h1 className="text-lg">{runId ? '保存训练任务' : '新建训练任务'}</h1>
+          <h1 className="text-lg">{runId ? 'Edit Training Job' : 'New Training Job'}</h1>
         </div>
         <div className="flex-1"></div>
         {showAdvancedView && (
@@ -205,16 +205,13 @@ export default function TrainingForm() {
               <SelectInput
                 value={`${gpuIDs}`}
                 onChange={value => setGpuIDs(value)}
-                options={gpuList.map((gpu: any) => ({ value: `${gpu.index}`, label: `显卡 GPU #${gpu.index}` }))}
+                options={gpuList.map((gpu: any) => ({ value: `${gpu.index}`, label: `GPU #${gpu.index}` }))}
               />
             </div>
             <div className="mx-4 bg-gray-200 dark:bg-gray-800 w-1 h-6"></div>
             <div>
-              <Button
-                className="text-gray-200 bg-gray-800 px-3 py-1 rounded-md"
-                onClick={handleImportConfig}
-              >
-                导入配置
+              <Button className="text-gray-200 bg-gray-800 px-3 py-1 rounded-md" onClick={handleImportConfig}>
+                Import Config
               </Button>
             </div>
             <div className="mx-4 bg-gray-200 dark:bg-gray-800 w-1 h-6"></div>
@@ -258,16 +255,16 @@ export default function TrainingForm() {
             className="text-gray-200 bg-gray-800 px-3 py-1 rounded-md"
             onClick={() => setShowAdvancedView(!showAdvancedView)}
           >
-            {showAdvancedView ? '显示常规' : '显示高级'}
+            {showAdvancedView ? 'Show Simple' : 'Show Advanced'}
           </Button>
         </div>
         <div>
           <Button
-            className="text-gray-200 bg-green-800 px-3 py-1 rounded-md"
+            className="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md"
             onClick={() => saveJob()}
             disabled={status === 'saving'}
           >
-            {status === 'saving' ? '保存中...' : runId ? '更新任务' : '创建任务'}
+            {status === 'saving' ? 'Saving...' : runId ? 'Update Job' : 'Create Job'}
           </Button>
         </div>
       </TopBar>
@@ -300,7 +297,7 @@ export default function TrainingForm() {
           <ErrorBoundary
             fallback={
               <div className="flex items-center justify-center h-64 text-lg text-red-600 font-medium bg-red-100 dark:bg-red-900/20 dark:text-red-400 border border-red-300 dark:border-red-700 rounded-lg">
-                检测到高级任务配置。请切换到高级视图继续编辑。
+                Advanced job detected. Please switch to advanced view to continue.
               </div>
             }
           >

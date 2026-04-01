@@ -55,27 +55,27 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
       text = '正在加载图片';
       subtitle = '请稍候，正在获取数据集中的图片...';
       showIt = true;
-      bgColor = 'bg-gray-50 dark:bg-gray-800/50';
-      textColor = 'text-gray-900 dark:text-gray-100';
-      iconColor = 'text-gray-500 dark:text-gray-400';
+      bgColor = 'bg-gray-800/50';
+      textColor = 'text-gray-100';
+      iconColor = 'text-gray-400';
     }
     if (status == 'error') {
       icon = <LuBan className="w-8 h-8" />;
       text = '加载失败';
       subtitle = '获取图片时出现问题，请尝试刷新页面。';
       showIt = true;
-      bgColor = 'bg-red-50 dark:bg-red-950/20';
-      textColor = 'text-red-900 dark:text-red-100';
-      iconColor = 'text-red-600 dark:text-red-400';
+      bgColor = 'bg-red-600/20';
+      textColor = 'text-red-100';
+      iconColor = 'text-red-400';
     }
     if (status == 'success' && imgList.length === 0) {
       icon = <LuImageOff className="w-8 h-8" />;
       text = '暂无图片';
       subtitle = '此数据集为空。点击"添加图片"开始上传。';
       showIt = true;
-      bgColor = 'bg-gray-50 dark:bg-gray-800/50';
-      textColor = 'text-gray-900 dark:text-gray-100';
-      iconColor = 'text-gray-500 dark:text-gray-400';
+      bgColor = 'bg-gray-800/50';
+      textColor = 'text-gray-100';
+      iconColor = 'text-gray-400';
     }
 
     if (!showIt) return null;
@@ -106,7 +106,7 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
         <div className="flex-1"></div>
         <div>
           <Button
-            className="text-gray-200 bg-slate-600 px-3 py-1 rounded-md"
+            className="text-white bg-slate-600 px-3 py-1 rounded-md"
             onClick={() => openImagesModal(datasetName, () => refreshImageList(datasetName))}
           >
             添加图片

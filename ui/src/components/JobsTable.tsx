@@ -28,7 +28,7 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
 
   const columns: TableColumn[] = [
     {
-      title: '任务名称',
+      title: 'Name',
       key: 'name',
       render: row => (
         <Link href={`/jobs/${row.id}`} className="font-medium whitespace-nowrap">
@@ -40,7 +40,7 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
       ),
     },
     {
-      title: '训练进度',
+      title: 'Steps',
       key: 'steps',
       render: row => {
         const jobConfig: JobConfig = JSON.parse(row.job_config);
@@ -62,40 +62,28 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
       },
     },
     {
-      title: '显卡 (GPU)',
+      title: 'GPU',
       key: 'gpu_ids',
     },
     {
-      title: '状态',
+      title: 'Status',
       key: 'status',
       render: row => {
         let statusClass = 'text-gray-400';
-        let statusText = row.status;
-        if (row.status === 'completed') {
-          statusClass = 'text-green-400';
-          statusText = '已完成';
-        }
-        if (row.status === 'failed') {
-          statusClass = 'text-red-400';
-          statusText = '失败';
-        }
-        if (row.status === 'running') {
-          statusClass = 'text-blue-400';
-          statusText = '运行中';
-        }
-        if (row.status === 'queued') statusText = '排队中';
-        if (row.status === 'stopping') statusText = '停止中';
+        if (row.status === 'completed') statusClass = 'text-green-400';
+        if (row.status === 'failed') statusClass = 'text-red-400';
+        if (row.status === 'running') statusClass = 'text-blue-400';
 
-        return <span className={statusClass}>{statusText}</span>;
+        return <span className={statusClass}>{row.status}</span>;
       },
     },
     {
-      title: '备注信息',
+      title: 'Info',
       key: 'info',
       className: 'truncate max-w-xs',
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       className: 'text-right',
       render: row => {
@@ -111,7 +99,7 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
     gpuList.forEach(gpu => {
       jd[`${gpu.index}`] = { name: `${gpu.name}`, jobs: [] };
     });
-    jd['Idle'] = { name: '可用/闲置', jobs: [] };
+    jd['Idle'] = { name: 'Idle', jobs: [] };
     jobs.forEach(job => {
       const gpu = gpuList.find(gpu => job.gpu_ids?.split(',').includes(gpu.index.toString())) as GpuInfo;
       const key = `${gpu?.index || '0'}`;
@@ -156,39 +144,39 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
               <div
                 className={classNames(
                   'text-md flex px-4 py-1 rounded-t-lg',
-                  { 'bg-green-900': queue?.is_running },
-                  { 'bg-red-900': !queue?.is_running },
+                  { 'bg-green-600 dark:bg-green-900': queue?.is_running },
+                  { 'bg-red-600 dark:bg-red-900': !queue?.is_running },
                 )}
               >
                 <div className="flex items-center space-x-2 flex-1 py-2">
-                  <h2 className="font-semibold text-gray-100">{jobsDict[gpuKey].name}</h2>
-                  <span className="px-2 py-0.5 bg-gray-700 rounded-full text-xs text-gray-300"># 显卡序号 {queue?.gpu_ids}</span>
+                  <h2 className="font-semibold text-white">{jobsDict[gpuKey].name}</h2>
+                  <span className="px-2 py-0.5 bg-gray-700 rounded-full text-xs text-gray-300"># {queue?.gpu_ids}</span>
                 </div>
                 <div className="text-sm text-gray-300 italic flex items-center">
                   {queue?.is_running ? (
                     <>
-                      <span className="text-green-400 mr-2">队列运行中</span>
+                      <span className="text-green-100 dark:text-green-400 mr-2">Queue Running</span>
                       <button
                         onClick={async () => {
                           await stopQueue(queue.gpu_ids as string);
                           refresh();
                         }}
-                        className="ml-4 text-xs bg-red-900 hover:bg-red-800 px-2 py-1 rounded"
+                        className="ml-4 text-xs text-white bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
                       >
-                        停止队列
+                        STOP
                       </button>
                     </>
                   ) : (
                     <>
-                      <span className="text-red-400 mr-2">队列已停止</span>
+                      <span className="text-red-100 dark:text-red-400 mr-2">Queue Stopped</span>
                       <button
                         onClick={async () => {
                           await startQueue(gpuKey);
                           refresh();
                         }}
-                        className="ml-4 text-xs bg-green-700 hover:bg-green-600 px-2 py-1 rounded"
+                        className="ml-4 text-xs text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded"
                       >
-                        启动队列
+                        START
                       </button>
                     </>
                   )}
@@ -199,7 +187,11 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
                 rows={jobsDict[gpuKey].jobs}
                 isLoading={isLoading}
                 onRefresh={refresh}
-                theadClassName={queue?.is_running ? 'bg-green-950' : 'bg-red-950'}
+                theadClassName={
+                  queue?.is_running
+                    ? 'bg-green-700 dark:bg-green-950 text-white dark:text-gray-400'
+                    : 'bg-red-700 dark:bg-red-950 text-white dark:text-gray-400'
+                }
               />
             </div>
           );
@@ -208,7 +200,7 @@ export default function JobsTable({ onlyActive = false }: JobsTableProps) {
         <div className="mb-6 opacity-50">
           <div className="text-md flex px-4 py-1 rounded-t-lg bg-slate-600">
             <div className="flex items-center space-x-2 flex-1 py-2">
-              <h2 className="font-semibold text-gray-100">已完成或待定任务 (Idle)</h2>
+              <h2 className="font-semibold text-gray-100">Idle</h2>
             </div>
           </div>
           <UniversalTable columns={columns} rows={jobsDict['Idle'].jobs} isLoading={isLoading} onRefresh={refresh} />

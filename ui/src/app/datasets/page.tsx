@@ -27,7 +27,7 @@ export default function Datasets() {
 
   const columns: TableColumn[] = [
     {
-      title: '数据集名称',
+      title: 'Dataset Name',
       key: 'name',
       render: row => (
         <Link href={`/datasets/${row.name}`} className="text-gray-200 hover:text-gray-100">
@@ -36,7 +36,7 @@ export default function Datasets() {
       ),
     },
     {
-      title: '操作',
+      title: 'Actions',
       key: 'actions',
       className: 'w-20 text-right',
       render: row => (
@@ -52,10 +52,10 @@ export default function Datasets() {
 
   const handleDeleteDataset = (datasetName: string) => {
     openConfirm({
-      title: '删除数据集',
-      message: `确定要删除数据集 "${datasetName}" 吗？此操作不可撤销。`,
+      title: 'Delete Dataset',
+      message: `Are you sure you want to delete the dataset "${datasetName}"? This action cannot be undone.`,
       type: 'warning',
-      confirmText: '删除',
+      confirmText: 'Delete',
       onConfirm: () => {
         apiClient
           .post('/api/datasets/delete', { name: datasetName })
@@ -85,11 +85,11 @@ export default function Datasets() {
 
   const openNewDatasetModal = () => {
     openConfirm({
-      title: '新建数据集',
-      message: '输入新数据集的名称：',
+      title: 'New Dataset',
+      message: 'Enter the name of the new dataset:',
       type: 'info',
-      confirmText: '创建',
-      inputTitle: '数据集名称',
+      confirmText: 'Create',
+      inputTitle: 'Dataset Name',
       onConfirm: async (name?: string) => {
         if (!name) {
           console.error('Dataset name is required.');
@@ -114,15 +114,15 @@ export default function Datasets() {
     <>
       <TopBar>
         <div>
-          <h1 className="text-2xl font-semibold text-gray-100">数据集管理</h1>
+          <h1 className="text-lg">Datasets</h1>
         </div>
         <div className="flex-1"></div>
         <div>
           <Button
-            className="text-gray-200 bg-slate-600 px-4 py-2 rounded-md hover:bg-slate-500 transition-colors"
+            className="text-white bg-slate-600 px-3 py-1 rounded-md hover:bg-slate-500 transition-colors"
             onClick={() => openNewDatasetModal()}
           >
-            新建数据集
+            New Dataset
           </Button>
         </div>
       </TopBar>
@@ -139,16 +139,16 @@ export default function Datasets() {
       <Modal
         isOpen={isNewDatasetModalOpen}
         onClose={() => setIsNewDatasetModalOpen(false)}
-        title="新建数据集"
+        title="New Dataset"
         size="md"
       >
         <div className="space-y-4 text-gray-200">
           <form onSubmit={handleCreateDataset}>
             <div className="text-sm text-gray-400">
-              这将在你的 datasets 文件夹下创建一个同名的子文件夹。
+              This will create a new folder with the name below in your dataset folder.
             </div>
             <div className="mt-4">
-              <TextInput label="数据集名称" value={newDatasetName} onChange={value => setNewDatasetName(value)} />
+              <TextInput label="Dataset Name" value={newDatasetName} onChange={value => setNewDatasetName(value)} />
             </div>
 
             <div className="mt-6 flex justify-end space-x-3">
@@ -157,13 +157,13 @@ export default function Datasets() {
                 className="rounded-md bg-gray-700 px-4 py-2 text-gray-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 onClick={() => setIsNewDatasetModalOpen(false)}
               >
-                取消
+                Cancel
               </button>
               <button
                 type="submit"
                 className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                确认
+                Confirm
               </button>
             </div>
           </form>
