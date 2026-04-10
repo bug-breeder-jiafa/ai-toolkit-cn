@@ -43,7 +43,6 @@ export default function JobActionBar({
             if (onRefresh) onRefresh();
           }}
           className={`ml-2 opacity-100`}
-          title="启动任务"
         >
           <Play />
         </Button>
@@ -56,7 +55,6 @@ export default function JobActionBar({
             if (onRefresh) onRefresh();
           }}
           className={`ml-2 opacity-100`}
-          title="从队列移除"
         >
           <X />
         </Button>
@@ -66,10 +64,10 @@ export default function JobActionBar({
           onClick={() => {
             if (!canStop) return;
             openConfirm({
-              title: '停止任务',
-              message: `确定要停止任务 "${job.name}" 吗？你可以稍后恢复运行。`,
+              title: 'Stop Job',
+              message: `Are you sure you want to stop the job "${job.name}"? You CAN resume later.`,
               type: 'info',
-              confirmText: '停止',
+              confirmText: 'Stop',
               onConfirm: async () => {
                 await stopJob(job.id);
                 if (onRefresh) onRefresh();
@@ -93,15 +91,15 @@ export default function JobActionBar({
       )}
       <Button
         onClick={() => {
-          let message = `确定要删除任务 "${job.name}" 吗？这将从磁盘中永久删除该任务及其所有输出。`;
+          let message = `Are you sure you want to delete the job "${job.name}"? This will also permanently remove it from your disk.`;
           if (job.status === 'running') {
-            message += ' 警告：任务正在运行中，建议先停止任务再删除。';
+            message += ' WARNING: The job is currently running. You should stop it first if you can.';
           }
           openConfirm({
-            title: '删除任务',
+            title: 'Delete Job',
             message: message,
             type: 'warning',
-            confirmText: '删除',
+            confirmText: 'Delete',
             onConfirm: async () => {
               if (job.status === 'running') {
                 try {
@@ -125,21 +123,26 @@ export default function JobActionBar({
           <Cog />
         </MenuButton>
         <MenuItems anchor="bottom" className="bg-gray-900 border border-gray-700 rounded shadow-lg w-48 px-2 py-2 mt-4">
-          <MenuItem>
-            <Link href={`/jobs/new?cloneId=${job.id}`} className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded block">
-              克隆任务
-            </Link>
-          </MenuItem>
+          {job.job_type === 'train' && (
+            <MenuItem>
+              <Link
+                href={`/jobs/new?cloneId=${job.id}`}
+                className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded block"
+              >
+                Clone Job
+              </Link>
+            </MenuItem>
+          )}
           <MenuItem>
             <div
               className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded"
               onClick={() => {
-                let message = `确定要将此任务标记为已停止吗？这会将任务状态强制设为'stopped'，仅适用于任务状态卡死的情况。请确保任务确实已停止，此操作不会实际停止任务。`;
+                let message = `Are you sure you want to mark this job as stopped? This will set the job status to 'stopped' if the status is hung. Only do this if you are 100% sure the job is stopped. This will NOT stop the job.`;
                 openConfirm({
-                  title: '强制标记为已停止',
+                  title: 'Mark Job as Stopped',
                   message: message,
                   type: 'warning',
-                  confirmText: '标记为已停止',
+                  confirmText: 'Mark as Stopped',
                   onConfirm: async () => {
                     await markJobAsStopped(job.id);
                     onRefresh && onRefresh();
@@ -147,7 +150,7 @@ export default function JobActionBar({
                 });
               }}
             >
-              强制标记为已停止
+              Mark as Stopped
             </div>
           </MenuItem>
         </MenuItems>
