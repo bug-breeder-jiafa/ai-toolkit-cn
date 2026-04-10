@@ -91,15 +91,15 @@ export default function JobActionBar({
       )}
       <Button
         onClick={() => {
-          let message = `Are you sure you want to delete the job "${job.name}"? This will also permanently remove it from your disk.`;
+          let message = `确定要删除任务「${job.name}」吗？此操作将同时从磁盘中永久删除该任务。`;
           if (job.status === 'running') {
-            message += ' WARNING: The job is currently running. You should stop it first if you can.';
+            message += ' 警告：该任务当前正在运行，建议先停止后再删除。'
           }
           openConfirm({
-            title: 'Delete Job',
+            title: '删除任务',
             message: message,
             type: 'warning',
-            confirmText: 'Delete',
+            confirmText: '删除',
             onConfirm: async () => {
               if (job.status === 'running') {
                 try {
