@@ -14,7 +14,7 @@ export default function Dashboard() {
         <div className="flex-1"></div>
         <div>
           <Link href="/jobs/new" className="text-white bg-slate-600 px-3 py-1 rounded-md">
-            New Training Job
+            新建训练任务
           </Link>
         </div>
       </TopBar>

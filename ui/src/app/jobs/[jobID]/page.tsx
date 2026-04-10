@@ -28,14 +28,14 @@ interface Page {
 
 const pages: Page[] = [
   {
-    name: 'Overview',
+    name: '任务概览',
     value: 'overview',
     icon: MdDashboard,
     component: JobOverview,
     mainCss: 'pt-24',
   },
   {
-    name: 'Samples',
+    name: '采样预览',
     value: 'samples',
     icon: MdImage,
     component: SampleImages,
@@ -44,7 +44,7 @@ const pages: Page[] = [
     jobTypes: ['train'],
   },
   {
-    name: 'Loss Graph',
+    name: '损失曲线',
     value: 'loss_log',
     icon: MdShowChart,
     component: JobLossGraph,
@@ -52,7 +52,7 @@ const pages: Page[] = [
     jobTypes: ['train'],
   },
   {
-    name: 'Config File',
+    name: '配置文件',
     value: 'config',
     icon: MdCode,
     component: JobConfigViewer,
