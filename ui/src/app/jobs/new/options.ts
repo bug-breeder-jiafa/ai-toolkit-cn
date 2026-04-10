@@ -791,12 +791,12 @@ export const modelArchs: ModelArch[] = [
     },
     sampleTags: {
       "CAPTION": {
-        title: "Audio Prompt",
+        title: "音频提示",
         type: "text",
         full: true,
       },
       "LYRICS": {
-        title: "Lyrics",
+        title: "歌词",
         type: "multiline",
         full: true,
       },
@@ -809,15 +809,15 @@ export const modelArchs: ModelArch[] = [
         type: "text",
       },
       "TIMESIGNATURE": {
-        title: "Time Signature",
+        title: "拍号",
         type: "text",
       },
       "DURATION": {
-        title: "Duration (sec)",
+        title: "时长（秒）",
         type: "number",
       },
       "LANGUAGE": {
-        title: "Language",
+        title: "语言",
         type: "text",
       },
     },
@@ -846,12 +846,12 @@ export const modelArchs: ModelArch[] = [
     },
     sampleTags: {
       "CAPTION": {
-        title: "Audio Prompt",
+        title: "音频提示",
         type: "text",
         full: true,
       },
       "LYRICS": {
-        title: "Lyrics",
+        title: "歌词",
         type: "multiline",
         full: true,
       },
@@ -864,15 +864,15 @@ export const modelArchs: ModelArch[] = [
         type: "text",
       },
       "TIMESIGNATURE": {
-        title: "Time Signature",
+        title: "拍号",
         type: "text",
       },
       "DURATION": {
-        title: "Duration (sec)",
+        title: "时长（秒）",
         type: "number",
       },
       "LANGUAGE": {
-        title: "Language",
+        title: "语言",
         type: "text",
       },
     },
@@ -902,7 +902,7 @@ export const groupedModelOptions: GroupedSelectOption[] = modelArchs.reduce((acc
 }, [] as GroupedSelectOption[]);
 
 export const quantizationOptions: SelectOption[] = [
-  { value: '', label: '- NONE -' },
+  { value: '', label: '- 无 -' },
   { value: 'qfloat8', label: 'float8 (default)' },
   { value: 'uint7', label: '7 bit' },
   { value: 'uint6', label: '6 bit' },

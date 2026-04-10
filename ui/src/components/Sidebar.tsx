@@ -6,11 +6,11 @@ import ThemeLogo from './ThemeLogo';
 
 const Sidebar = () => {
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'New Job', href: '/jobs/new', icon: Plus },
-    { name: 'Queue', href: '/jobs', icon: BrainCircuit },
-    { name: 'Datasets', href: '/datasets', icon: Images },
-    { name: 'Settings', href: '/settings', icon: Settings },
+    { name: '仪表盘', href: '/dashboard', icon: Home },
+    { name: '新建训练任务', href: '/jobs/new', icon: Plus },
+    { name: '任务队列', href: '/jobs', icon: BrainCircuit },
+    { name: '数据集', href: '/datasets', icon: Images },
+    { name: '系统设置', href: '/settings', icon: Settings },
   ];
 
   const socialsBoxClass =
@@ -57,7 +57,7 @@ const Sidebar = () => {
             </g>
           </svg>
         </div>
-        <div className="uppercase text-gray-500 text-sm mb-2 flex-1 pt-2 pl-0">Support AI-Toolkit</div>
+        <div className="uppercase text-gray-500 text-sm mb-2 flex-1 pt-2 pl-0">支持 AI-Toolkit</div>
       </a>
 
       {/* Social links grid */}

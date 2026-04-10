@@ -39,7 +39,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
           const datasetPath = `${splits[splits.length - 1]}`;
           title = (
             <>
-              <small className="opacity-50">CAPTION: </small> {datasetPath}
+              <small className="opacity-50">标注：</small> {datasetPath}
             </>
           );
         }
