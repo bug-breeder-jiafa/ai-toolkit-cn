@@ -64,10 +64,10 @@ export default function JobActionBar({
           onClick={() => {
             if (!canStop) return;
             openConfirm({
-              title: 'Stop Job',
-              message: `Are you sure you want to stop the job "${job.name}"? You CAN resume later.`,
+              title: '停止任务',
+              message: `确定要停止任务「${job.name}」吗？之后可以恢复运行。`,
               type: 'info',
-              confirmText: 'Stop',
+              confirmText: '停止',
               onConfirm: async () => {
                 await stopJob(job.id);
                 if (onRefresh) onRefresh();
