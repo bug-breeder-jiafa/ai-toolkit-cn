@@ -112,7 +112,7 @@ export const CaptionDatasetModal: React.FC = () => {
   };
 
   return (
-    <Modal isOpen={open} onClose={handleClose} title="Caption Dataset" size="lg">
+    <Modal isOpen={open} onClose={handleClose} title="标注数据集" size="lg">
       <div className="space-y-4 text-gray-200">
         <form
           onSubmit={e => {
@@ -124,7 +124,7 @@ export const CaptionDatasetModal: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <SelectInput
-                  label="Captioner Type"
+                  label="标注器类型"
                   value={jobConfig.config.process[0].type}
                   onChange={value => {
                     handleCaptionerTypeChange(jobConfig.config.process[0].type, value, jobConfig, setJobConfig);
@@ -145,7 +145,7 @@ export const CaptionDatasetModal: React.FC = () => {
             </div>
             <div className="mt-4">
               <CreatableSelectInput
-                label="Name or Path"
+                label="名称或路径"
                 value={jobConfig.config.process[0].caption.model_name_or_path}
                 docKey="config.process[0].caption.model_name_or_path"
                 onChange={(value: string | null) => {
@@ -162,7 +162,7 @@ export const CaptionDatasetModal: React.FC = () => {
             {selectedCaptionOption?.additionalSections?.includes('caption.model_name_or_path2') && (
               <div className="mt-4">
                 <CreatableSelectInput
-                  label="Name or Path 2"
+                  label="名称或路径 2"
                   value={jobConfig.config.process[0].caption.model_name_or_path2 || ''}
                   onChange={(value: string | null) => {
                     if (value?.trim() === '') {
@@ -178,7 +178,7 @@ export const CaptionDatasetModal: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div>
                 <SelectInput
-                  label="Quantize"
+                  label="量化"
                   value={jobConfig.config.process[0].caption.quantize ? jobConfig.config.process[0].caption.qtype : ''}
                   onChange={value => {
                     if (value === '') {
