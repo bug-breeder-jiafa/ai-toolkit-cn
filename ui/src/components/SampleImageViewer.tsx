@@ -298,11 +298,22 @@ export default function SampleImageViewer({
                 </MenuButton>
                 <MenuItems
                   anchor="bottom end"
-                  className="bg-gray-900 border border-gray-700 rounded shadow-lg w-48 px-4 py-2 mt-1 z-50"
+                  className="bg-gray-900 border border-gray-700 rounded shadow-lg w-48 px-2 py-2 mt-1 z-50"
                 >
+                  {imgPath && isAudio(imgPath) && (
+                    <MenuItem>
+                      <a
+                        className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded block"
+                        href={`/api/img/${encodeURIComponent(imgPath)}`}
+                        download={imgPath.replace(/^.*[\\/]/, '')}
+                      >
+                        Download
+                      </a>
+                    </MenuItem>
+                  )}
                   <MenuItem>
                     <div
-                      className="cursor-pointer"
+                      className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded"
                       onClick={() => {
                         let message = `确定要删除此预览吗？此操作无法撤销。`;
                         openConfirm({

@@ -80,7 +80,7 @@ const DatasetImageCard: React.FC<DatasetImageCardProps> = ({
     if (inViewport && isVisible) {
       fetchCaption();
     }
-  }, [inViewport, isVisible]);
+  }, [inViewport, isVisible, isCaptionLoaded]);
 
   // Poll for caption updates every 5 seconds while auto-captioning
   useEffect(() => {
@@ -212,10 +212,10 @@ const DatasetImageCard: React.FC<DatasetImageCardProps> = ({
               className="bg-gray-800 rounded-full p-2"
               onClick={() => {
                 openConfirm({
-                  title: `删除${isItAVideo ? '视频' : '图片'}`,
-                  message: `确定要删除这个${isItAVideo ? '视频' : '图片'}吗？此操作无法撤销。`,
+                  title: `Delete ${isItAVideo ? 'video' : 'image'}`,
+                  message: `Are you sure you want to delete this ${isItAVideo ? 'video' : 'image'}? This action cannot be undone.`,
                   type: 'warning',
-                  confirmText: '删除',
+                  confirmText: 'Delete',
                   onConfirm: () => {
                     apiClient
                       .post('/api/img/delete', { imgPath: imageUrl })
@@ -241,7 +241,7 @@ const DatasetImageCard: React.FC<DatasetImageCardProps> = ({
           'border-transparent border-2': isCaptionCurrent,
         })}
       >
-        {inViewport && isVisible && isCaptionLoaded && (
+        {inViewport && isVisible && (isCaptionLoaded || caption) && (
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -263,11 +263,11 @@ const DatasetImageCard: React.FC<DatasetImageCardProps> = ({
         )}
         {(!inViewport || !isVisible) && isCaptionLoaded && (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
-            {isVisible ? '滚动到视图内编辑标注' : '显示内容以编辑标注'}
+            {isVisible ? 'Scroll into view to edit caption' : 'Show content to edit caption'}
           </div>
         )}
-        {!isCaptionLoaded && (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">加载标注中...</div>
+        {!isCaptionLoaded && !caption && (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">Loading caption...</div>
         )}
       </div>
     </div>
