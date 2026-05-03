@@ -927,13 +927,21 @@ export const modelArchs: ModelArch[] = [
   return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
 }) as any;
 
+const groupLabelMap: Record<ModelGroup, string> = {
+  image: '图像',
+  video: '视频',
+  instruction: '指令',
+  experimental: '实验性',
+  audio: '音频',
+};
+
 export const groupedModelOptions: GroupedSelectOption[] = modelArchs.reduce((acc, arch) => {
-  const group = acc.find(g => g.label === arch.group);
+  const group = acc.find(g => g.label === groupLabelMap[arch.group]);
   if (group) {
     group.options.push({ value: arch.name, label: arch.label });
   } else {
     acc.push({
-      label: arch.group,
+      label: groupLabelMap[arch.group],
       options: [{ value: arch.name, label: arch.label }],
     });
   }
@@ -963,12 +971,12 @@ interface JobTypeOption extends SelectOption {
 export const jobTypeOptions: JobTypeOption[] = [
   {
     value: 'diffusion_trainer',
-    label: 'LoRA Trainer',
+    label: 'LoRA 训练器',
     disableSections: ['slider'],
   },
   {
     value: 'concept_slider',
-    label: 'Concept Slider',
+    label: '概念滑块 (Concept Slider)',
     disableSections: ['trigger_word', 'train.diff_output_preservation'],
     onActivate: (config: JobConfig) => {
       // add default slider config

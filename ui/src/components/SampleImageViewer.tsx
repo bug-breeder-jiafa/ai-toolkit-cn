@@ -247,7 +247,7 @@ export default function SampleImageViewer({
                 {sampleItem?.prompt && (
                   <div className="absolute inset-0 grid place-items-center overflow-auto mr-4">
                     <div className="w-full">
-                      <span className="text-gray-400 mr-1">Prompt:</span>
+                      <span className="text-gray-400 mr-1">提示词:</span>
                       <span className="whitespace-pre-wrap break-words">{sampleItem.prompt}</span>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export default function SampleImageViewer({
                       alt="Main"
                       className="max-h-12 max-w-12 object-contain bg-black border-2 border-gray-700 hover:border-gray-500 rounded cursor-pointer"
                       onClick={() => setShowingControlIdx(null)}
-                      title="Main image"
+                      title="主图"
                     />
                   )}
                   {controlImages.map((ci, idx) => (
@@ -273,7 +273,7 @@ export default function SampleImageViewer({
                         showingControlIdx === idx ? 'border-blue-500' : 'border-gray-700 hover:border-gray-500'
                       }`}
                       onClick={() => setShowingControlIdx(idx)}
-                      title={`Control image ${idx + 1}`}
+                      title={`控制图 ${idx + 1}`}
                     />
                   ))}
                 </div>
@@ -281,13 +281,13 @@ export default function SampleImageViewer({
 
               <div className="text-xs">
                 <div>
-                  <span className="text-gray-400">Step:</span> {imgInfo.step.toLocaleString()}
+                  <span className="text-gray-400">步数:</span> {imgInfo.step.toLocaleString()}
                 </div>
                 <div>
-                  <span className="text-gray-400">Sample #:</span> {imgInfo.promptIdx + 1}
+                  <span className="text-gray-400">预览序号:</span> {imgInfo.promptIdx + 1}
                 </div>
                 <div>
-                  <span className="text-gray-400">Seed:</span> {seed}
+                  <span className="text-gray-400">种子:</span> {seed}
                 </div>
               </div>
             </div>
@@ -315,12 +315,12 @@ export default function SampleImageViewer({
                     <div
                       className="cursor-pointer px-4 py-1 hover:bg-gray-800 rounded"
                       onClick={() => {
-                        let message = `Are you sure you want to delete this sample? This action cannot be undone.`;
+                        let message = `确定要删除此预览吗？此操作无法撤销。`;
                         openConfirm({
-                          title: 'Delete Sample',
+                          title: '删除预览',
                           message: message,
                           type: 'warning',
-                          confirmText: 'Delete',
+                          confirmText: '删除',
                           onConfirm: () => {
                             apiClient
                               .post('/api/img/delete', { imgPath: imgPath })
@@ -338,7 +338,7 @@ export default function SampleImageViewer({
                         });
                       }}
                     >
-                      Delete Sample
+                      删除预览
                     </div>
                   </MenuItem>
                 </MenuItems>

@@ -29,7 +29,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
 
   const columns: TableColumn[] = [
     {
-      title: 'Name',
+      title: '名称',
       key: 'name',
       render: row => {
         let title = row.name;
@@ -39,7 +39,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
           const datasetPath = `${splits[splits.length - 1]}`;
           title = (
             <>
-              <small className="opacity-50">CAPTION: </small> {datasetPath}
+              <small className="opacity-50">标注：</small> {datasetPath}
             </>
           );
         }
@@ -54,7 +54,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
       },
     },
     {
-      title: 'Steps',
+      title: '步数',
       key: 'steps',
       render: row => {
         const jobConfig: JobConfig = JSON.parse(row.job_config);
@@ -83,7 +83,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
       key: 'gpu_ids',
     },
     {
-      title: 'Status',
+      title: '状态',
       key: 'status',
       render: row => {
         let statusClass = 'text-gray-400';
@@ -95,12 +95,12 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
       },
     },
     {
-      title: 'Info',
+      title: '信息',
       key: 'info',
       className: 'truncate max-w-xs',
     },
     {
-      title: 'Actions',
+      title: '操作',
       key: 'actions',
       className: 'text-right',
       render: row => {
@@ -116,19 +116,19 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
     gpuList.forEach(gpu => {
       jd[`${gpu.index}`] = { name: `${gpu.name}`, jobs: [] };
     });
-    jd['Idle'] = { name: 'Idle', jobs: [] };
+    jd['空闲'] = { name: '空闲', jobs: [] };
     jobs.forEach(job => {
       const gpu = gpuList.find(gpu => job.gpu_ids?.split(',').includes(gpu.index.toString())) as GpuInfo;
       const key = `${gpu?.index || '0'}`;
       if (['queued', 'running', 'stopping'].includes(job.status) && key in jd) {
         jd[key].jobs.push(job);
       } else {
-        jd['Idle'].jobs.push(job);
+        jd['空闲'].jobs.push(job);
       }
     });
     // sort the queued/running jobs by queue position
     Object.keys(jd).forEach(key => {
-      if (key === 'Idle') {
+      if (key === '空闲') {
         jd[key].jobs.sort((a, b) => {
           // sort by updated_at, newest first
           return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
@@ -153,7 +153,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
     <div>
       {Object.keys(jobsDict)
         .sort()
-        .filter(key => key !== 'Idle')
+        .filter(key => key !== '空闲')
         .map(gpuKey => {
           const queue = queues.find(q => `${q.gpu_ids}` === gpuKey) as Queue;
           return (
@@ -172,7 +172,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
                 <div className="text-sm text-gray-300 italic flex items-center">
                   {queue?.is_running ? (
                     <>
-                      <span className="text-green-100 dark:text-green-400 mr-2">Queue Running</span>
+                      <span className="text-green-100 dark:text-green-400 mr-2">队列运行中</span>
                       <button
                         onClick={async () => {
                           await stopQueue(queue.gpu_ids as string);
@@ -180,12 +180,12 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
                         }}
                         className="ml-4 text-xs text-white bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
                       >
-                        STOP
+                        停止
                       </button>
                     </>
                   ) : (
                     <>
-                      <span className="text-red-100 dark:text-red-400 mr-2">Queue Stopped</span>
+                      <span className="text-red-100 dark:text-red-400 mr-2">队列已停止</span>
                       <button
                         onClick={async () => {
                           await startQueue(gpuKey);
@@ -193,7 +193,7 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
                         }}
                         className="ml-4 text-xs text-white bg-green-600 hover:bg-green-700 px-2 py-1 rounded"
                       >
-                        START
+                        启动
                       </button>
                     </>
                   )}
@@ -213,14 +213,14 @@ export default function JobsTable({ onlyActive = false, job_type = null }: JobsT
             </div>
           );
         })}
-      {!onlyActive && Object.keys(jobsDict).includes('Idle') && (
+      {!onlyActive && Object.keys(jobsDict).includes('空闲') && (
         <div className="mb-6 opacity-50">
           <div className="text-md flex px-4 py-1 rounded-t-lg bg-slate-600">
             <div className="flex items-center space-x-2 flex-1 py-2">
-              <h2 className="font-semibold text-gray-100">Idle</h2>
+              <h2 className="font-semibold text-gray-100">空闲</h2>
             </div>
           </div>
-          <UniversalTable columns={columns} rows={jobsDict['Idle'].jobs} isLoading={isLoading} onRefresh={refresh} />
+          <UniversalTable columns={columns} rows={jobsDict['空闲'].jobs} isLoading={isLoading} onRefresh={refresh} />
         </div>
       )}
     </div>

@@ -57,8 +57,8 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
 
     if (status == 'loading') {
       icon = <LuLoader className="animate-spin w-8 h-8" />;
-      text = 'Loading Images';
-      subtitle = 'Please wait while we fetch your dataset images...';
+      text = '正在加载图片';
+      subtitle = '请稍候，正在获取数据集中的图片...';
       showIt = true;
       bgColor = 'bg-gray-800/50';
       textColor = 'text-gray-100';
@@ -66,8 +66,8 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
     }
     if (status == 'error') {
       icon = <LuBan className="w-8 h-8" />;
-      text = 'Error Loading Images';
-      subtitle = 'There was a problem fetching the images. Please try refreshing the page.';
+      text = '加载失败';
+      subtitle = '获取图片时出现问题，请尝试刷新页面。';
       showIt = true;
       bgColor = 'bg-red-600/20';
       textColor = 'text-red-100';
@@ -75,8 +75,8 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
     }
     if (status == 'success' && imgList.length === 0) {
       icon = <LuImageOff className="w-8 h-8" />;
-      text = 'No Images Found';
-      subtitle = 'This dataset is empty. Click "Add Images" to get started.';
+      text = '暂无图片';
+      subtitle = '此数据集为空。点击"添加图片"开始上传。';
       showIt = true;
       bgColor = 'bg-gray-800/50';
       textColor = 'text-gray-100';
@@ -106,7 +106,7 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
           </Button>
         </div>
         <div>
-          <h1 className="text-lg">Dataset: {datasetName}</h1>
+          <h1 className="text-lg">数据集： {datasetName}</h1>
         </div>
         <div className="flex-1"></div>
         <div>
@@ -118,7 +118,7 @@ export default function DatasetPage({ params }: { params: { datasetName: string 
             className="text-white bg-slate-600 px-3 py-1 rounded-md"
             onClick={() => openImagesModal(datasetName, () => refreshImageList(datasetName))}
           >
-            Add Images
+            添加图片
           </Button>
         </div>
       </TopBar>
